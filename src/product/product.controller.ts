@@ -1,33 +1,50 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Product } from './schemas/product.schema';
 
-@Controller('product')
+@ApiTags('Products')
+@Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly service: ProductService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new product' })
+  @ApiResponse({ status: 201, description: 'Product created successfully', type: Product })
+  create(@Body() dto: CreateProductDto) { 
+    return this.service.create(dto); 
+  }
 
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  @ApiOperation({ summary: 'Get all products, optionally filter by category' })
+  @ApiResponse({ status: 200, description: 'List of products', type: [Product] })
+  findAll(@Query('category') category?: string) { 
+    return this.service.findAll(category); 
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(id);
+  @ApiOperation({ summary: 'Get product by ID' })
+  @ApiResponse({ status: 200, description: 'Product found', type: Product })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  findOne(@Param('id') id: string) { 
+    return this.service.findOne(id); 
   }
 
-  @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateData: Partial<CreateProductDto>) {
-    return this.productService.update(id, updateData);
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update product by ID' })
+  @ApiResponse({ status: 200, description: 'Product updated', type: Product })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  update(@Param('id') id: string, @Body() dto: UpdateProductDto) { 
+    return this.service.update(id, dto); 
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(id);
+  @ApiOperation({ summary: 'Delete product by ID' })
+  @ApiResponse({ status: 200, description: 'Product deleted' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  remove(@Param('id') id: string) { 
+    return this.service.remove(id); 
   }
 }

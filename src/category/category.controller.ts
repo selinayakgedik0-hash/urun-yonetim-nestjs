@@ -1,33 +1,51 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Category } from './schemas/category.schema';
 
-@Controller('category')
+@ApiTags('Categories')
+@Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly service: CategoryService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new category' })
+  @ApiResponse({ status: 201, description: 'Category created successfully', type: Category })
+  create(@Body() dto: CreateCategoryDto) { 
+    return this.service.create(dto); 
+  }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @ApiOperation({ summary: 'Get all categories' })
+  @ApiResponse({ status: 200, description: 'List of categories', type: [Category] })
+  findAll() { 
+    return this.service.findAll(); 
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(id);
+  @ApiOperation({ summary: 'Get category by ID' })
+  @ApiResponse({ status: 200, description: 'Category found', type: Category })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  findOne(@Param('id') id: string) { 
+    return this.service.findOne(id); 
   }
 
-  @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateData: Partial<CreateCategoryDto>) {
-    return this.categoryService.update(id, updateData);
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update category by ID' })
+  @ApiResponse({ status: 200, description: 'Category updated', type: Category })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) { 
+    return this.service.update(id, dto); 
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(id);
+  @ApiOperation({ summary: 'Delete category by ID' })
+  @ApiResponse({ status: 200, description: 'Category deleted' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  remove(@Param('id') id: string) { 
+    return this.service.remove(id); 
   }
 }
+
